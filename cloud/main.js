@@ -26,6 +26,8 @@ Parse.Cloud.afterSave("videos",function(request){
       	if(users) {
       		var userId = users[0];
 
+        	var video = request.object;
+
     		request.log.info("user id: " + userId);
 
 			var userQuery = new Parse.Query("users");
@@ -38,7 +40,7 @@ Parse.Cloud.afterSave("videos",function(request){
                 	request.log.info("successfully find video user");
 
                 	var user = results[0];
-                    var title = request.object.get("title").toLowerCase();
+                    var title = video.get("title").toLowerCase();
                     var username = user.get("fullname").toLowerCase();
 
                     var newTitle = title + "-" + username;
@@ -46,14 +48,14 @@ Parse.Cloud.afterSave("videos",function(request){
       
                     request.log.info("shortUrl: " + shortUrl);
 
-        			request.object.set("shortUrl", replacedTitle);
-        			request.object.save();
+        			video.set("shortUrl", replacedTitle);
+        			video.save();
         			return;
 				},
                 error: function (error) {
                     request.log.info("error setting video " + userId);
                     if(saveNeeded) {
-   						request.object.save();
+   						video.save();
    					}
    					return;
                 },
