@@ -46,7 +46,7 @@ Parse.Cloud.afterSave("videos",function(request){
                     var newTitle = title + "-" + username;
       				var replacedTitle = newTitle.split(' ').join('-');
       
-                    request.log.info("shortUrl: " + shortUrl);
+                    request.log.info("shortUrl: " + replacedTitle);
 
         			video.set("shortUrl", replacedTitle);
         			video.save();
