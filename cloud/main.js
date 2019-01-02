@@ -26,40 +26,17 @@ Parse.Cloud.afterSave("videos",function(request){
       	if(users) {
       		var userId = users[0];
 
-        	var video = request.object;
+    		var video = request.object;
 
     		request.log.info("user id: " + userId);
 
-			var userQuery = new Parse.Query("users");
-
-            request.log.info("query: " + userQuery);
-            userQuery.get(userId, {
-                success: function (results) {
-
-                	request.log.info("successfully find video user");
-
-                	var user = results[0];
-                    var title = video.get("title").toLowerCase();
-                    var username = user.get("fullname").toLowerCase();
-
-                    var newTitle = title + "-" + username;
-      				var replacedTitle = newTitle.split(' ').join('-');
+    		var title = video.get("title").toLowerCase();
+      		var replacedTitle = title.split(' ').join('-');
       
-                    request.log.info("shortUrl: " + replacedTitle);
+            request.log.info("shortUrl: " + replacedTitle);
 
-        			video.set("shortUrl", replacedTitle);
-        			video.save();
-        			return;
-				},
-                error: function (error) {
-                    request.log.info("error setting video " + userId);
-                    if(saveNeeded) {
-   						video.save();
-   					}
-   					return;
-                },
-                useMasterKey: true
-            });
+        	video.set("shortUrl", replacedTitle);
+        	video.save();
 	    } else {
 	    	request.log.info("video has no users");
 	    }
