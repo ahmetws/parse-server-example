@@ -51,7 +51,8 @@ Parse.Cloud.afterSave("videos",function(request){
                     if(saveNeeded) {
    						request.object.save();
    					}
-                }
+                },
+                useMasterKey: true
             });
 	    } else {
 	    	request.log.info("video has no users");
