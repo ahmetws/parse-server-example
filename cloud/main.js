@@ -2,7 +2,7 @@ Parse.Cloud.define('hello', function(req, res) {
   return 'Hi';
 });
 
-Parse.Cloud.afterSave("videos",function(request,response){
+Parse.Cloud.afterSave("videos",function(request){
 
     console.log("after videos");
     console.log("request: " + JSON.stringify(request, undefined, 2));
@@ -24,9 +24,5 @@ Parse.Cloud.afterSave("videos",function(request,response){
         		var replacedTitle = title.split(' ').join('+');
             	request.object.set("shortUrl", replacedTitle);
         	}
-
         }
-
-    response.success();
-
 });
