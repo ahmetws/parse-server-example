@@ -30,7 +30,7 @@ Parse.Cloud.afterSave("videos",function(request){
 
     		var Users = Parse.Object.extend("users");
     		var query = new Parse.Query(Users);
-            userQuery.get(userId, {
+            query.get(userId, {
                 success: function (user) {
 
                 	request.log.info("successfully find video user");
