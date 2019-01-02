@@ -1,16 +1,13 @@
-Parse.Cloud.define('hello', function(req, res) {
-  return 'Hi';
-});
-
 Parse.Cloud.afterSave("videos",function(request){
 
     request.log.info("after save videos");
+
+    var saveNeeded = false;
 
     if(request.object.get("youtubeId")) {
       	request.log.info("youtubeId: " + request.object.get("youtubeId"));
 
       	var youtubeId = request.object.get("youtubeId");
-      	var saveNeeded = false;
         
         if(!request.object.get("image")) {
        		request.object.set("image", "http://i3.ytimg.com/vi/"+ youtubeId +"/maxresdefault.jpg");
@@ -20,10 +17,6 @@ Parse.Cloud.afterSave("videos",function(request){
       	if(!request.object.get("url")) {
  			request.object.set("url", "https://www.youtube.com/embed/"+ youtubeId +"");
  			saveNeeded = true;
-   		}
-
-   		if(saveNeeded) {
-   			request.object.save();
    		}
       }
 
@@ -35,13 +28,12 @@ Parse.Cloud.afterSave("videos",function(request){
 
     		request.log.info("user id: " + userId);
 
-      		var userQuery = new Parse.Query('users');
-            userQuery.equalTo('objectId', userId);
-            userQuery.find({
-                success: function (results) {
+    		var Users = Parse.Object.extend("users");
+    		var query = new Parse.Query(Users);
+            userQuery.get(userId{
+                success: function (user) {
 
                 	request.log.info("successfully find video user");
-                    var user = results[0];
 
                     var title = request.object.get("title").toLowerCase();
                     var username = user.get("fullname").toLowerCase();
@@ -56,6 +48,9 @@ Parse.Cloud.afterSave("videos",function(request){
 				},
                 error: function (error) {
                     request.log.info("error setting video " + userId);
+                    if(saveNeeded) {
+   						request.object.save();
+   					}
                 }
             });
 	    } else {
