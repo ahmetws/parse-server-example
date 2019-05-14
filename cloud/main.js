@@ -1,17 +1,3 @@
-function postTweet(request, message) {
-
-    message("post tweet function start");
-    var now = new Date();
-    message(now);
-    message("post tweet function end");
-
-    const Videos = Parse.Object.extend("videos");
-    const query = new Parse.Query(Videos);
-    query.limit(1);
-    const results = await query.find();
-    message("Successfully retrieved " + results);
-}
-
 Parse.Cloud.afterSave("videos",function(request){
 
     request.log.info("after save videos");
@@ -71,12 +57,46 @@ Parse.Cloud.afterSave("users",function(request){
 });
 
 Parse.Cloud.job("tubeTweet", (request) =>  {
-      // params: passed in the job call
-      // headers: from the request that triggered the job
-      // log: the ParseServer logger passed in the request
-      // message: a function to update the status message of the job object
-      const { params, headers, log, message } = request;
-      message("I just started");
-      return postTweet(request, message);
+    // params: passed in the job call
+    // headers: from the request that triggered the job
+    // log: the ParseServer logger passed in the request
+    // message: a function to update the status message of the job object
+    const { params, headers, log, message } = request;
+    message("I just started");
+    message("post tweet function start");
+    var now = new Date();
+    message(now);
+    message("post tweet function end");
+
+    const Videos = Parse.Object.extend("videos");
+    const query = new Parse.Query(Videos);
+    query.limit(1);
+    const results = await query.find();
+    message("Successfully retrieved " + results);
+});
+
+Parse.Cloud.job("sendTodaysTweet", (request) =>  {
+    const { params, headers, log, message } = request;
+    message("I just started sendTodaysTweet");
+
+    message("sendTodaysTweet - post tweet function start");
+    var now = new Date();
+    y = now.getFullYear(),
+    m = now.getMonth()  
+    d = now.getDay()
+    var firstDay = new Date(y, m, d).getDate() ;
+    var lastDay = new Date(y, m, d+1).getDate()
+    var querydate = '"currentDate" : {"$gt" : "'+y+'-'+m+'-'+firstDay+' 00:00:00.000" , "$lt" : "'+y+'-'+m+'-'+lastDay+' 00:00:00.000"}';
+    message(querydate);
+    message("sendTodaysTweet - post tweet function end");
+
+    const Videos = Parse.Object.extend("todaysVideos");
+    const query = new Parse.Query(Videos);
+    query.limit(1);
+    query.greaterThan("currentDate", "" + firstDay +' 00:00:00.000');
+    query.lessThan("currentDate", "" + lastDay +' 00:00:00.000');
+
+    const results = await query.find();
+    message("Successfully retrieved " + results);
 });
 
