@@ -77,9 +77,11 @@ Parse.Cloud.job("tubeTweet", async (request) =>  {
 
 Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     const { params, headers, log, message } = request;
-    message("I just started sendTodaysTweet");
 
-    message("sendTodaysTweet - post tweet function start");
+    var status = ""
+    status += "I just started sendTodaysTweet \n";
+
+    status += "sendTodaysTweet - post tweet function start \n";
     var now = new Date();
     y = now.getFullYear(),
     m = now.getMonth()  
@@ -87,16 +89,45 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     var firstDay = new Date(y, m, d).getDate() ;
     var lastDay = new Date(y, m, d+1).getDate()
     var querydate = '"currentDate" : {"$gt" : "'+y+'-'+m+'-'+firstDay+' 00:00:00.000" , "$lt" : "'+y+'-'+m+'-'+lastDay+' 00:00:00.000"}';
-    message(querydate);
-    message("sendTodaysTweet - post tweet function end");
+    status += querydate;
+    status += "sendTodaysTweet - post tweet function end \n";
 
-    const Videos = Parse.Object.extend("todaysVideos");
-    const query = new Parse.Query(Videos);
+    const TodaysVideos = Parse.Object.extend("todaysVideos");
+    const query = new Parse.Query(TodaysVideos);
     query.limit(1);
     query.greaterThan("currentDate", "" + firstDay +' 00:00:00.000');
     query.lessThan("currentDate", "" + lastDay +' 00:00:00.000');
 
     const results = await query.find();
-    message("Successfully retrieved " + results);
+    status += "Successfully retrieved \n";
+
+    var videoId = results.get("videoId")
+
+    const Videos = Parse.Object.extend("videos");
+    const videoQuery = new Parse.Query(Videos);
+    videoQuery.limit(1);
+    videoQuery.equalTo("objectId", videoId);
+    const videoResult = await videoQuery.find();
+    message("Successfully retrieved video Result " + videoResult);
+
+    var tweet = "Today's video is 🥁🥁🥁\n";
+    tweet += "Full keyboard control in iOS apps";
+    tweet += "by " + "@qdoug" + "at" + "@nslondonmeetup" + "🔥🔥🔥\n";
+    tweet += "#iOSDev #swiftlang #swifttube";
+
+    var xhr = new XMLHttpRequest();
+    const url='https://api.bufferapp.com/1/updates/create.json';
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhr.open("POST", url, true);
+    var data = new FormData();
+    data.append('text', tweet);
+    data.append('media', { 'link' : 'http://www.swifttube.co/video/full-keyboard-control-in-ios-apps'});
+    data.append('profile_ids', {'5cda1e0160c00824bf4eb582'});
+    data.append('access_token', '1/03a22b23f2f87319d7dfdc1015284cf8');
+
+    xhr.send(data);
+    xhr.onload = function () {
+      console.log(this.responseText);
+    };
 });
 
