@@ -95,8 +95,8 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     const TodaysVideo = Parse.Object.extend("todaysVideo");
     const query = new Parse.Query(TodaysVideo);
     query.limit(1);
-    query.greaterThan("currentDate", "" + firstDay +' 00:00:00.000');
-    query.lessThan("currentDate", "" + lastDay +' 00:00:00.000');
+    query.greaterThan("currentDate", firstDay);
+    query.lessThan("currentDate", lastDay);
 
     const results = await query.find();
     status += "Successfully retrieved \n";
