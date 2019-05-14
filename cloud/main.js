@@ -56,7 +56,7 @@ Parse.Cloud.afterSave("users",function(request){
       }
 });
 
-Parse.Cloud.job("tubeTweet", (request) =>  {
+Parse.Cloud.job("tubeTweet", async (request) =>  {
     // params: passed in the job call
     // headers: from the request that triggered the job
     // log: the ParseServer logger passed in the request
@@ -75,7 +75,7 @@ Parse.Cloud.job("tubeTweet", (request) =>  {
     message("Successfully retrieved " + results);
 });
 
-Parse.Cloud.job("sendTodaysTweet", (request) =>  {
+Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     const { params, headers, log, message } = request;
     message("I just started sendTodaysTweet");
 
