@@ -83,11 +83,11 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
 
     status += "sendTodaysTweet - post tweet function start \n";
     var now = new Date();
-    y = now.getFullYear(),
-    m = now.getMonth()  
-    d = now.getDay()
-    var firstDay = new Date(y, m, d).getDate() ;
-    var lastDay = new Date(y, m, d+1).getDate();
+    y = now.getFullYear();
+    m = now.getMonth();
+    d = now.getDate();
+    var firstDay = new Date(y, m, d);
+    var lastDay = new Date(y, m, d+1);
     var querydate = '"currentDate" : {"$gt" : "'+y+'-'+m+'-'+firstDay+' 00:00:00.000" , "$lt" : "'+y+'-'+m+'-'+lastDay+' 00:00:00.000"}';
     status += querydate;
     status += "sendTodaysTweet - post tweet function end \n";
