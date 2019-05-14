@@ -105,7 +105,7 @@ Parse.Cloud.job("sendTodaysTweet", (request) =>  {
       statusText += results;
       statusText += "Successfully retrieved \n";
       
-      if(results == nil) {
+      if(results == null) {
         status.error("todaysVideo is nil")
       }
       var videoId = results.get("videoId");
@@ -116,7 +116,7 @@ Parse.Cloud.job("sendTodaysTweet", (request) =>  {
       videoQuery.equalTo("objectId", videoId);
       videoQuery.find().then(function (videoResults) {
 
-        if(videoResults == nil) {
+        if(videoResults == null) {
           status.error("videoResults is nil")
         }
         statusText += "Successfully retrieved video Result " + videoResults.length;
