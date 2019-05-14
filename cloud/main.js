@@ -108,7 +108,7 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     videoQuery.limit(1);
     videoQuery.equalTo("objectId", videoId);
     const videoResult = await videoQuery.find();
-    message("Successfully retrieved video Result " + videoResult);
+    status += "Successfully retrieved video Result " + videoResult;
 
     var tweet = "Today's video is 🥁🥁🥁\n";
     tweet += "Full keyboard control in iOS apps";
@@ -127,7 +127,9 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
 
     xhr.send(data);
     xhr.onload = function () {
-      console.log(this.responseText);
+      status += this.responseText;
     };
+
+    message(status);
 });
 
