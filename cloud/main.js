@@ -80,10 +80,10 @@ Parse.Cloud.job("tubeTweet", async (request) =>  {
 Parse.Cloud.job("sendTodaysTweet", (request) =>  {
     const { params, headers, log, message } = request;
 
-    var status = ""
-    status += "I just started sendTodaysTweet \n";
+    var statusText = ""
+    statusText += "I just started sendTodaysTweet \n";
 
-    status += "sendTodaysTweet - post tweet function start \n";
+    statusText += "sendTodaysTweet - post tweet function start \n";
     var now = new Date();
     y = now.getUTCFullYear();
     m = now.getUTCMonth();
@@ -91,8 +91,8 @@ Parse.Cloud.job("sendTodaysTweet", (request) =>  {
     var firstDay = new Date(y, m, d).getDate();
     var lastDay = new Date(y, m, d+1).getDate();
     var querydate = '"currentDate" : {"$gt" : "'+y+'-'+m+'-'+firstDay+'T00:00:00Z" , "$lt" : "'+y+'-'+m+'-'+lastDay+' 00:00:00.000"}';
-    status += querydate;
-    status += "sendTodaysTweet - post tweet function end \n";
+    statusText += querydate;
+    statusText += "sendTodaysTweet - post tweet function end \n";
 
     const TodaysVideo = Parse.Object.extend("todaysVideo");
     const query = new Parse.Query(TodaysVideo);
@@ -100,27 +100,33 @@ Parse.Cloud.job("sendTodaysTweet", (request) =>  {
     query.greaterThan("currentDate", y+'-'+pad(m)+'-'+firstDay+'T00:00:00Z');
     query.lessThan("currentDate", y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z');
 
-    query.first().then(function (results) {
+    query.find().then(function (results) {
 
-      status += results;
-      status += "Successfully retrieved \n";
-  
+      statusText += results;
+      statusText += "Successfully retrieved \n";
+      
+      if(results == nil) {
+        status.error("todaysVideo is nil")
+      }
       var videoId = results.get("videoId");
 
       const Videos = Parse.Object.extend("videos");
       const videoQuery = new Parse.Query(Videos);
       videoQuery.limit(1);
       videoQuery.equalTo("objectId", videoId);
-      videoQuery.first().then(function (videoResults) {
+      videoQuery.find().then(function (videoResults) {
 
-        status += "Successfully retrieved video Result " + videoResults.length;
+        if(videoResults == nil) {
+          status.error("videoResults is nil")
+        }
+        statusText += "Successfully retrieved video Result " + videoResults.length;
         var shortUrl = videoResults.get("shortUrl");
         var tweet = "Today's video is 🥁🥁🥁\n";
         tweet += videoResults.get("title");
         tweet += "by " + "@qdoug" + "at" + "@nslondonmeetup" + "🔥🔥🔥\n";
         tweet += "#iOSDev #swiftlang #swifttube";
     
-        message(status);
+        message(statusText);
   
         Parse.Cloud.httpRequest({
           method: 'POST',
