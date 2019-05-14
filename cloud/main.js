@@ -1,3 +1,5 @@
+function pad(n){ return n<10 ? '0'+n : n }
+
 Parse.Cloud.afterSave("videos",function(request){
 
     request.log.info("after save videos");
@@ -83,20 +85,20 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
 
     status += "sendTodaysTweet - post tweet function start \n";
     var now = new Date();
-    y = now.getFullYear();
-    m = now.getMonth();
-    d = now.getDate();
-    var firstDay = new Date(y, m, d);
-    var lastDay = new Date(y, m, d+1);
-    var querydate = '"currentDate" : {"$gt" : "'+y+'-'+m+'-'+firstDay+' 00:00:00.000" , "$lt" : "'+y+'-'+m+'-'+lastDay+' 00:00:00.000"}';
+    y = now.getUTCFullYear();
+    m = now.getUTCMonth();
+    d = now.getUTCDate();
+    var firstDay = new Date(y, m, d).getDate();
+    var lastDay = new Date(y, m, d+1).getDate();
+    var querydate = '"currentDate" : {"$gt" : "'+y+'-'+m+'-'+firstDay+'T00:00:00Z" , "$lt" : "'+y+'-'+m+'-'+lastDay+' 00:00:00.000"}';
     status += querydate;
     status += "sendTodaysTweet - post tweet function end \n";
 
     const TodaysVideo = Parse.Object.extend("todaysVideo");
     const query = new Parse.Query(TodaysVideo);
     query.limit(1);
-    query.greaterThan("currentDate", firstDay);
-    query.lessThan("currentDate", lastDay);
+    query.greaterThan("currentDate", y+'-'+pad(m)+'-'+firstDay+'T00:00:00Z');
+    query.lessThan("currentDate", y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z');
 
     const results = await query.find();
     status += "Successfully retrieved \n";
