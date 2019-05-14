@@ -101,19 +101,21 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     const results = await query.find();
     status += "Successfully retrieved \n";
 
-    var videoId = results.get("videoId");
+    // var videoId = results.get("videoId");
 
-    const Videos = Parse.Object.extend("videos");
-    const videoQuery = new Parse.Query(Videos);
-    videoQuery.limit(1);
-    videoQuery.equalTo("objectId", videoId);
-    const videoResult = await videoQuery.find();
-    status += "Successfully retrieved video Result " + videoResult;
+    // const Videos = Parse.Object.extend("videos");
+    // const videoQuery = new Parse.Query(Videos);
+    // videoQuery.limit(1);
+    // videoQuery.equalTo("objectId", videoId);
+    // const videoResult = await videoQuery.find();
+    // status += "Successfully retrieved video Result " + videoResult;
 
     var tweet = "Today's video is 🥁🥁🥁\n";
     tweet += "Full keyboard control in iOS apps";
     tweet += "by " + "@qdoug" + "at" + "@nslondonmeetup" + "🔥🔥🔥\n";
     tweet += "#iOSDev #swiftlang #swifttube";
+
+    message(status);
 
     var xhr = new XMLHttpRequest();
     const url='https://api.bufferapp.com/1/updates/create.json';
@@ -126,10 +128,5 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     data.append('access_token', '1/03a22b23f2f87319d7dfdc1015284cf8');
 
     xhr.send(data);
-    xhr.onload = function () {
-      status += this.responseText;
-    };
-
-    message(status);
 });
 
