@@ -1,9 +1,15 @@
-function postTweet(request) {
+function postTweet(request, message) {
 
-    request.log.info("post tweet function start");
+    message("post tweet function start");
     var now = new Date();
-    request.log.info(now);
-    request.log.info("post tweet function end");
+    message(now);
+    message("post tweet function end");
+
+    const Videos = Parse.Object.extend("videos");
+    const query = new Parse.Query(Videos);
+    query.limit(1);
+    const results = await query.find();
+    message("Successfully retrieved " + results);
 }
 
 Parse.Cloud.afterSave("videos",function(request){
@@ -70,7 +76,7 @@ Parse.Cloud.job("tubeTweet", (request) =>  {
       // log: the ParseServer logger passed in the request
       // message: a function to update the status message of the job object
       const { params, headers, log, message } = request;
-      request.log.info("I just started");
-      return postTweet(request);
+      message("I just started");
+      return postTweet(request, message);
 });
 
