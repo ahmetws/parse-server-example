@@ -1,3 +1,11 @@
+function postTweet(request) {
+
+    request.log.info("post tweet function start");
+    var now = new Date();
+    request.log.info(now);
+    request.log.info("post tweet function end");
+}
+
 Parse.Cloud.afterSave("videos",function(request){
 
     request.log.info("after save videos");
@@ -55,3 +63,14 @@ Parse.Cloud.afterSave("users",function(request){
         request.object.save();
       }
 });
+
+Parse.Cloud.job("tubeTweet", (request) =>  {
+      // params: passed in the job call
+      // headers: from the request that triggered the job
+      // log: the ParseServer logger passed in the request
+      // message: a function to update the status message of the job object
+      const { params, headers, log, message } = request;
+      request.log.info("I just started");
+      return postTweet(request);
+});
+
