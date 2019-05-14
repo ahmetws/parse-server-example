@@ -100,41 +100,43 @@ Parse.Cloud.job("sendTodaysTweet", (request) =>  {
     query.greaterThan("currentDate", y+'-'+pad(m)+'-'+firstDay+'T00:00:00Z');
     query.lessThan("currentDate", y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z');
 
-    query.find().then(function (results) {
+    query.first().then(function (results) {
 
       status += results;
       status += "Successfully retrieved \n";
   
-      // var videoId = results.get("videoId");
+      var videoId = results.get("videoId");
 
-      // const Videos = Parse.Object.extend("videos");
-      // const videoQuery = new Parse.Query(Videos);
-      // videoQuery.limit(1);
-      // videoQuery.equalTo("objectId", videoId);
-      // const videoResult = await videoQuery.find();
-      // status += "Successfully retrieved video Result " + videoResult;
-  
-      var tweet = "Today's video is 🥁🥁🥁\n";
-      tweet += "Full keyboard control in iOS apps";
-      tweet += "by " + "@qdoug" + "at" + "@nslondonmeetup" + "🔥🔥🔥\n";
-      tweet += "#iOSDev #swiftlang #swifttube";
-  
-      message(status);
+      const Videos = Parse.Object.extend("videos");
+      const videoQuery = new Parse.Query(Videos);
+      videoQuery.limit(1);
+      videoQuery.equalTo("objectId", videoId);
+      videoQuery.first().then(function (videoResults) {
 
-      Parse.Cloud.httpRequest({
-        method: 'POST',
-        url: 'https://api.bufferapp.com/1/updates/create.json',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: {
-          access_token: '1/03a22b23f2f87319d7dfdc1015284cf8',
-          text: tweet,
-          media: { 'link' : 'http://www.swifttube.co/video/full-keyboard-control-in-ios-apps'},
-          profile_ids: '5cda1e0160c00824bf4eb582'
-        }
+        status += "Successfully retrieved video Result " + videoResults.length;
+        var shortUrl = videoResults.get("shortUrl");
+        var tweet = "Today's video is 🥁🥁🥁\n";
+        tweet += videoResults.get("title");
+        tweet += "by " + "@qdoug" + "at" + "@nslondonmeetup" + "🔥🔥🔥\n";
+        tweet += "#iOSDev #swiftlang #swifttube";
+    
+        message(status);
+  
+        Parse.Cloud.httpRequest({
+          method: 'POST',
+          url: 'https://api.bufferapp.com/1/updates/create.json',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: {
+            access_token: '1/03a22b23f2f87319d7dfdc1015284cf8',
+            text: tweet,
+            media: { 'link' : 'http://www.swifttube.co/video/'+ shortUrl},
+            profile_ids: '5cda1e0160c00824bf4eb582'
+          }
+        });
+        status.success();
       });
-      status.success();
     });
 });
 
