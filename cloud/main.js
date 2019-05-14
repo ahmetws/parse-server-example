@@ -133,15 +133,8 @@ Parse.Cloud.job("sendTodaysTweet", (request) =>  {
           media: { 'link' : 'http://www.swifttube.co/video/full-keyboard-control-in-ios-apps'},
           profile_ids: '5cda1e0160c00824bf4eb582'
         }
-      }).then(function(httpResponse) {
-        console.log(httpResponse.text);
-      }, function(httpResponse) {
-        console.error('Request failed with response code ' + httpResponse.status);
       });
       status.success();
-    },
-    error: function(error){
-      status.error(error);
     });
 });
 
