@@ -122,7 +122,7 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     var data = new FormData();
     data.append('text', tweet);
     data.append('media', { 'link' : 'http://www.swifttube.co/video/full-keyboard-control-in-ios-apps'});
-    data.append('profile_ids', {'5cda1e0160c00824bf4eb582'});
+    data.append('profile_ids', ['5cda1e0160c00824bf4eb582']);
     data.append('access_token', '1/03a22b23f2f87319d7dfdc1015284cf8');
 
     xhr.send(data);
