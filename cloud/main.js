@@ -77,7 +77,7 @@ Parse.Cloud.job("tubeTweet", async (request) =>  {
     message("Successfully retrieved " + results);
 });
 
-Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
+Parse.Cloud.job("sendTodaysTweet", (request) =>  {
     const { params, headers, log, message } = request;
 
     var status = ""
@@ -100,35 +100,42 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     query.greaterThan("currentDate", y+'-'+pad(m)+'-'+firstDay+'T00:00:00Z');
     query.lessThan("currentDate", y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z');
 
-    const results = await query.find();
-    status += "Successfully retrieved \n";
+    query.find().then(function (results) {
 
-    // var videoId = results.get("videoId");
+      status += results;
+      status += "Successfully retrieved \n";
+  
+      // var videoId = results.get("videoId");
 
-    // const Videos = Parse.Object.extend("videos");
-    // const videoQuery = new Parse.Query(Videos);
-    // videoQuery.limit(1);
-    // videoQuery.equalTo("objectId", videoId);
-    // const videoResult = await videoQuery.find();
-    // status += "Successfully retrieved video Result " + videoResult;
+      // const Videos = Parse.Object.extend("videos");
+      // const videoQuery = new Parse.Query(Videos);
+      // videoQuery.limit(1);
+      // videoQuery.equalTo("objectId", videoId);
+      // const videoResult = await videoQuery.find();
+      // status += "Successfully retrieved video Result " + videoResult;
+  
+      var tweet = "Today's video is 🥁🥁🥁\n";
+      tweet += "Full keyboard control in iOS apps";
+      tweet += "by " + "@qdoug" + "at" + "@nslondonmeetup" + "🔥🔥🔥\n";
+      tweet += "#iOSDev #swiftlang #swifttube";
+  
+      message(status);
 
-    var tweet = "Today's video is 🥁🥁🥁\n";
-    tweet += "Full keyboard control in iOS apps";
-    tweet += "by " + "@qdoug" + "at" + "@nslondonmeetup" + "🔥🔥🔥\n";
-    tweet += "#iOSDev #swiftlang #swifttube";
-
-    message(status);
-
-    var xhr = new XMLHttpRequest();
-    const url='https://api.bufferapp.com/1/updates/create.json';
-    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    xhr.open("POST", url, true);
-    var data = new FormData();
-    data.append('text', tweet);
-    data.append('media', { 'link' : 'http://www.swifttube.co/video/full-keyboard-control-in-ios-apps'});
-    data.append('profile_ids', '5cda1e0160c00824bf4eb582');
-    data.append('access_token', '1/03a22b23f2f87319d7dfdc1015284cf8');
-
-    xhr.send(data);
+      var xhr = new XMLHttpRequest();
+      const url='https://api.bufferapp.com/1/updates/create.json';
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.open("POST", url, true);
+      var data = new FormData();
+      data.append('text', tweet);
+      data.append('media', { 'link' : 'http://www.swifttube.co/video/full-keyboard-control-in-ios-apps'});
+      data.append('profile_ids', '5cda1e0160c00824bf4eb582');
+      data.append('access_token', '1/03a22b23f2f87319d7dfdc1015284cf8');
+  
+      xhr.send(data);
+      status.success();
+    },
+    error: function(error){
+      status.error(error);
+    });
 });
 
