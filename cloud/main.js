@@ -77,7 +77,7 @@ Parse.Cloud.job("tubeTweet", async (request) =>  {
     message("Successfully retrieved " + results);
 });
 
-Parse.Cloud.job("sendTodaysTweet", (request) =>  {
+Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     const { params, headers, log, message } = request;
 
     var statusText = ""
@@ -86,63 +86,110 @@ Parse.Cloud.job("sendTodaysTweet", (request) =>  {
     statusText += "sendTodaysTweet - post tweet function start \n";
     var now = new Date();
     y = now.getUTCFullYear();
-    m = now.getUTCMonth();
+    m = now.getUTCMonth() + 1;
     d = now.getUTCDate();
     var firstDay = new Date(y, m, d).getDate();
     var lastDay = new Date(y, m, d+1).getDate();
-    var querydate = '"currentDate" : {"$gt" : "'+y+'-'+m+'-'+firstDay+'T00:00:00Z" , "$lt" : "'+y+'-'+m+'-'+lastDay+' 00:00:00.000"}';
+    var querydate = '"currentDate" : {""'+ y+'-'+pad(m)+'-'+firstDay+'T00:00:00Z' + "$lt : "+ y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z';
     statusText += querydate;
     statusText += "sendTodaysTweet - post tweet function end \n";
 
     const TodaysVideo = Parse.Object.extend("todaysVideo");
     const query = new Parse.Query(TodaysVideo);
     query.limit(1);
-    query.greaterThan("currentDate", y+'-'+pad(m)+'-'+firstDay+'T00:00:00Z');
-    query.lessThan("currentDate", y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z');
 
-    query.find().then(function (results) {
+    var firstDate = new Date(y+'-'+pad(m)+'-'+firstDay+'T00:00:00Z');
+    var lastDate = new Date(y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z');
+    query.greaterThanOrEqualTo("currentDate", firstDate);
+    query.lessThan("currentDate", lastDate);
+    console.log(query);
 
-      statusText += results;
-      statusText += "Successfully retrieved \n";
+    const results = await query.find()
+
       
-      if(results == null) {
-        status.error("todaysVideo is nil")
+    if(results == null) {
+      status.error("todaysVideo is nil");
+    }
+
+    var video = results[0];
+    console.log(video);
+    var videoId = video.get("videoId");
+
+    const Videos = Parse.Object.extend("videos");
+    const videoQuery = new Parse.Query(Videos);
+    videoQuery.limit(1);
+    videoQuery.equalTo("objectId", videoId);
+
+    const videoResults = await videoQuery.find()
+
+    if(videoResults == null) {
+      status.error("videoResults is nil");
+    }
+
+    var currentVideo = videoResults[0];
+
+
+    // find conference
+    var conferenceId = currentVideo.get("conferences");
+    const Conferences = Parse.Object.extend("conferences");
+    const conferenceQuery = new Parse.Query(Conferences);
+    conferenceQuery.limit(1);
+    conferenceQuery.equalTo("objectId", conferenceId);
+
+    const conferenceResults = await conferenceQuery.find();
+    var conference = conferenceResults[0];
+
+    var shortUrl = 'http://www.swifttube.co/video/' + currentVideo.get("shortUrl");
+
+    var meetupName = conference.get("fullname");
+
+    if(conference.get("twitter") != null) {
+      meetupName = "@" + conference.get("twitter");
+    }
+
+    // find users
+    var users = currentVideo.get("users");
+    const UsersTable = Parse.Object.extend("users");
+    const usersQuery = new Parse.Query(UsersTable);
+    usersQuery.containedIn("objectId", users);
+
+    const userResults = await usersQuery.find();
+
+    var username = "";
+    for (let i = 0; i < userResults.length; i++) {
+      var user = userResults[i];
+
+      if(user.get("twitter") != null) {
+        username += "@" + user.get("twitter");
+      } else {
+        username += user.get("fullname");
       }
-      var videoId = results.get("videoId");
+      username += " ";
+    }
 
-      const Videos = Parse.Object.extend("videos");
-      const videoQuery = new Parse.Query(Videos);
-      videoQuery.limit(1);
-      videoQuery.equalTo("objectId", videoId);
-      videoQuery.find().then(function (videoResults) {
+    var tweet = "Today's video is 🥁🥁🥁\n";
+    tweet += currentVideo.get("title");
+    tweet += " by " + username + "at " + meetupName + " 🔥🔥🔥\n";
+    tweet += "#iOSDev #swiftlang #swifttube\n";
+    tweet += shortUrl;
+      
+    console.log(currentVideo);
+    console.log("Short : " + shortUrl);
 
-        if(videoResults == null) {
-          status.error("videoResults is nil")
-        }
-        statusText += "Successfully retrieved video Result " + videoResults.length;
-        var shortUrl = videoResults.get("shortUrl");
-        var tweet = "Today's video is 🥁🥁🥁\n";
-        tweet += videoResults.get("title");
-        tweet += "by " + "@qdoug" + "at" + "@nslondonmeetup" + "🔥🔥🔥\n";
-        tweet += "#iOSDev #swiftlang #swifttube";
-    
-        message(statusText);
-  
-        Parse.Cloud.httpRequest({
-          method: 'POST',
-          url: 'https://api.bufferapp.com/1/updates/create.json',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: {
-            access_token: '1/03a22b23f2f87319d7dfdc1015284cf8',
-            text: tweet,
-            media: { 'link' : 'http://www.swifttube.co/video/'+ shortUrl},
-            profile_ids: '5cda1e0160c00824bf4eb582'
-          }
-        });
-        status.success();
-      });
+    Parse.Cloud.httpRequest({
+      method: 'POST',
+      url: 'https://api.bufferapp.com/1/updates/create.json',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: {
+        access_token: '1/03a22b23f2f87319d7dfdc1015284cf8',
+        text: tweet,
+        now: true,
+        profile_ids: '5cda1e0160c00824bf4eb582'
+      }
     });
+        
+    status.success();
 });
 
