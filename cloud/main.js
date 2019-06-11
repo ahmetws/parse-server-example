@@ -58,6 +58,54 @@ Parse.Cloud.afterSave("users",function(request){
       }
 });
 
+Parse.Cloud.job("addTodaysVideo", async (request) =>  {
+    const Videos = Parse.Object.extend("videos");
+    var TodaysVideo = Parse.Object.extend("todaysVideo");
+
+
+    const query = new Parse.Query(Videos);
+    var random = Math.floor((Math.random() * 200) + 1);
+    console.log("random : " + random);
+    query.skip(random);
+    query.limit(1);
+    const results = await query.find();
+
+    if(results == null) {
+      console.log("videoResults is nil");
+    }
+
+    var video = results[0];
+    console.log(video);
+    var videoId = video.id;
+    console.log(videoId);
+
+    const lastQuery = new Parse.Query(TodaysVideo);
+    lastQuery.limit(1);
+    lastQuery.descending("createdAt");
+    const lastResults = await lastQuery.find();
+
+    var lastVideo = lastResults[0];
+    console.log(lastVideo);
+    var lastVideoId = lastVideo.id;
+
+    var getQuery = new Parse.Query(TodaysVideo);
+    getQuery.get(lastVideoId)
+    .then((last) => {
+      
+      console.log(last);
+      var lastVideoDate = last.get("currentDate");
+      lastVideoDate.setDate(lastVideoDate.getDate() + 1);
+      console.log(lastVideoDate);
+
+      var today = new TodaysVideo();
+      today.set('videoId', videoId);
+      today.set('currentDate', lastVideoDate);
+      today.save(null, { useMasterKey: true });
+      message("Successfully retrieved " + results);
+    }, (error) => {
+    });
+});
+
 Parse.Cloud.job("tubeTweet", async (request) =>  {
     // params: passed in the job call
     // headers: from the request that triggered the job
@@ -80,10 +128,6 @@ Parse.Cloud.job("tubeTweet", async (request) =>  {
 Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     const { params, headers, log, message } = request;
 
-    var statusText = ""
-    statusText += "I just started sendTodaysTweet \n";
-
-    statusText += "sendTodaysTweet - post tweet function start \n";
     var now = new Date();
     y = now.getUTCFullYear();
     m = now.getUTCMonth() + 1;
@@ -91,8 +135,6 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     var firstDay = new Date(y, m, d).getDate();
     var lastDay = new Date(y, m, d+1).getDate();
     var querydate = '"currentDate" : {""'+ y+'-'+pad(m)+'-'+firstDay+'T00:00:00Z' + "$lt : "+ y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z';
-    statusText += querydate;
-    statusText += "sendTodaysTweet - post tweet function end \n";
 
     const TodaysVideo = Parse.Object.extend("todaysVideo");
     const query = new Parse.Query(TodaysVideo);
@@ -102,10 +144,8 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     var lastDate = new Date(y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z');
     query.greaterThanOrEqualTo("currentDate", firstDate);
     query.lessThan("currentDate", lastDate);
-    console.log(query);
 
     const results = await query.find()
-
       
     if(results == null) {
       status.error("todaysVideo is nil");
@@ -127,7 +167,6 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     }
 
     var currentVideo = videoResults[0];
-
 
     // find conference
     var conferenceId = currentVideo.get("conferences");
@@ -172,9 +211,6 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     tweet += " by " + username + "at " + meetupName + " 🔥🔥🔥\n";
     tweet += "#iOSDev #swiftlang #swifttube\n";
     tweet += shortUrl;
-      
-    console.log(currentVideo);
-    console.log("Short : " + shortUrl);
 
     Parse.Cloud.httpRequest({
       method: 'POST',
