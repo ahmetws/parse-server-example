@@ -134,7 +134,17 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     d = now.getUTCDate();
     var firstDay = new Date(y, m, d).getDate();
     var lastDay = new Date(y, m, d+1).getDate();
+
+    if(firstDay < 10) {
+      firstDay = "0" + firstDay;
+    }
+
+    if(lastDay < 10) {
+      lastDay = "0" + lastDay;
+    }
+
     var querydate = '"currentDate" : {""'+ y+'-'+pad(m)+'-'+firstDay+'T00:00:00Z' + "$lt : "+ y+'-'+pad(m)+'-'+lastDay+'T00:00:00Z';
+    console.log(querydate);
 
     const TodaysVideo = Parse.Object.extend("todaysVideo");
     const query = new Parse.Query(TodaysVideo);
@@ -145,7 +155,9 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     query.greaterThanOrEqualTo("currentDate", firstDate);
     query.lessThan("currentDate", lastDate);
 
-    const results = await query.find()
+    console.log(firstDay);
+    console.log(lastDay);
+    const results = await query.find();
       
     if(results == null) {
       status.error("todaysVideo is nil");
@@ -160,7 +172,7 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     videoQuery.limit(1);
     videoQuery.equalTo("objectId", videoId);
 
-    const videoResults = await videoQuery.find()
+    const videoResults = await videoQuery.find();
 
     if(videoResults == null) {
       status.error("videoResults is nil");
