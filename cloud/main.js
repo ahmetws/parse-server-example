@@ -224,6 +224,8 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
     tweet += "#iOSDev #swiftlang #swifttube\n";
     tweet += shortUrl;
 
+    console.log(tweet);
+
     Parse.Cloud.httpRequest({
       method: 'POST',
       url: 'https://api.bufferapp.com/1/updates/create.json',
@@ -231,13 +233,13 @@ Parse.Cloud.job("sendTodaysTweet", async (request) =>  {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: {
-        access_token: '1/03a22b23f2f87319d7dfdc1015284cf8',
+        access_token: '2/b7839daa4534e64697ba930f1eb6a1dc73e5355237ad2b6011b4da04a8ae13e15f4c46be97e12ce90d6beb2ff9c404e6a7de7e552b9692e7259e6174f8310026',
         text: tweet,
         now: true,
         profile_ids: '5cda1e0160c00824bf4eb582'
       }
     });
-        
+
     status.success();
 });
 
